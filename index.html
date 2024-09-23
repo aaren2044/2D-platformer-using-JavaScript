@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Game</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: black; /* Background for the game level */
+            color: #FF4500; /* Reddish-orange text color */
+            font-family: 'Press Start 2P', cursive; /* Retro/arcade font */
+        }
+    
+        #startScreen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background-image: url('./img/start.png'); /* Background image for the start screen */
+            background-size: cover;
+            background-position: center;
+            z-index: 1;
+        }
+    
+        #infoScreen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background-color: #111; /* Solid dark background for the info screen */
+            z-index: 1;
+            border: 3px solid #FF4500;
+            box-shadow: 0px 0px 15px 5px #FF4500; /* Reddish-orange glow */
+        }
+    
+        #startScreen button, #infoScreen button {
+            padding: 15px 30px;
+            margin-top: 20px;
+            margin-left: 110px;
+            font-size: 22px;
+            cursor: pointer;
+            background-color: #111; /* Dark background */
+            color: #FF4500; /* Reddish-orange text color */
+            border: 2px solid #FF4500;
+            border-radius: 10px;
+            box-shadow: 0 0 15px #FF4500; /* Reddish-orange glow */
+            font-family: 'Press Start 2P', cursive; /* Retro/arcade font */
+            transition: all 0.3s ease;
+        }
+    
+        #startScreen button:hover, #infoScreen button:hover {
+            background-color: #FF4500; /* Reddish-orange background on hover */
+            color: #111; /* Dark text color on hover */
+            transform: scale(1.05); /* Slightly enlarge on hover */
+            box-shadow: 0 0 25px #FF4500; /* Intensify reddish-orange glow on hover */
+        }
+    
+        #infoIcon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 40px; /* Increased size for the info icon */
+            color: #ffcccb; /* Light pink color for the icon */
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.75); /* Shadow for the icon */
+        }
+    
+        #gameCanvas {
+            display: none; /* Hidden by default, will be shown after starting the game */
+        }
+    
+        /* Additional retro text style for headings */
+        h1 {
+            font-size: 28px;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #FF4500;
+        }
+    
+        /* Styling for list items in the info screen */
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+    
+        ul li {
+            font-size: 20px; /* Increased font size for names */
+            margin-bottom: 10px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+    
+        ul li:hover::after {
+            content: attr(data-contribution); /* Display contribution on hover */
+            position: absolute;
+            top: 0;
+            left: 100%;
+            margin-left: 15px;
+            font-size: 14px;
+            color: #FF4500;
+            white-space: nowrap;
+        }
+    </style>
+    
+    
+    
+    
+</head>
+<body>
+    <!-- Start Screen -->
+    <div id="startScreen">
+        <button id="startButton">Start Game</button>
+        <div id="infoIcon">ℹ️</div>
+    </div>
+
+    <!-- Information Screen -->
+    <div id="infoScreen" style="display:none;" class="info-screen">
+        <h1>No Return: A mini-project</h1>
+        <p>Developed by:</p>
+        <ul>
+            <li class="developer" data-contribution="Physics Programmer">Aaren Solanki - 10097</li>
+            <li class="developer" data-contribution="Level Designer">Abdussami Qazi - 10081</li>
+            <li class="developer" data-contribution="Emotional Support">Darshil Sonawane - 10098</li>
+        </ul>
+        <p>This game was developed as a part of a mini-project for Web Computing in 2024. It is a platformer game created using HTML, CSS, and JS.</p>
+        <button id="backButton" class="retro-button">Back to Start</button>
+    </div>
+    
+    
+
+    <!-- Game Canvas -->
+    <canvas id="gameCanvas" width="1024" height="576"></canvas>
+
+    <!-- Soundtrack for the game -->
+    <audio id="gameSoundtrack" src="./audio/soundtrack.mp3" loop autoplay></audio>
+
+    <!-- JavaScript Libraries and Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.1/gsap.min.js" integrity="sha512-Mf/xUqfWvDIr+1B6zfnIDIiG7XHzyP/guXUWgV6PgaQoIFeXkJQR5XWh9fqAiCiRCpemabt3naV4jhDWVnuYDQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/data/collisions.js"></script>
+    <script src="js/classes/CollisionBlock.js"></script>
+    <script src="js/classes/Sprite.js"></script>
+    <script src="js/classes/Player.js"></script>
+    <script src="js/eventListeners.js"></script>
+    <script src="script.js"></script>
+
+    <script>
+        // Get the audio element
+        const soundtrack = document.getElementById('gameSoundtrack');
+    
+        // Function to play the soundtrack
+        function playSoundtrack() {
+            soundtrack.play();
+        }
+    
+        // Function to pause the soundtrack
+        function pauseSoundtrack() {
+            soundtrack.pause();
+        }
+    
+        // Handle Start Game
+        document.getElementById('startButton').addEventListener('click', () => {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameCanvas').style.display = 'block';
+            startGame();  // Assuming startGame is a function in your script.js
+            playSoundtrack();  // Start the soundtrack when the game starts
+        });
+    
+        // Show Information Screen
+        document.getElementById('infoIcon').addEventListener('click', () => {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('infoScreen').style.display = 'flex';
+            pauseSoundtrack();  // Pause the soundtrack when info screen is shown
+        });
+    
+        // Back to Start Screen
+        document.getElementById('backButton').addEventListener('click', () => {
+            document.getElementById('infoScreen').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'flex';
+            pauseSoundtrack();  // Pause the soundtrack when going back to start
+        });
+    
+        function startGame() {
+            // Your existing game initialization code here
+            console.log("Game Started");
+        }
+    </script>
+    
+</body>
+</html>
